@@ -9,6 +9,12 @@ module FFMPEG
         Movie.new(__FILE__)
       end
 
+      context "given a non existing url" do
+        it "should throw an Exception" do
+          expect { Movie.new("#{fixture_url_path}/movies/i_dont_exist") }.to raise_error(Exception, /the url is not accessible/)
+        end
+      end
+
       context "given a non existing file" do
         let(:movie) { Movie.new('i_dont_exist') }
 
@@ -23,6 +29,17 @@ module FFMPEG
         it "should run ffmpeg successfully" do
           expect(movie.duration).to be_within(0.01).of(7.56)
           expect(movie.frame_rate).to be_within(0.01).of(16.75)
+        end
+      end
+
+      context "given a valid file provided through an url" do
+        before(:all) do
+          @movie = Movie.new("#{fixture_url_path}/movies/awesome%20movie.mov?raw=true")
+        end
+
+        it "should run ffmpeg successfully" do
+          @movie.duration.should == 7.56
+          @movie.frame_rate.should == 16.75
         end
       end
 
